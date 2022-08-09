@@ -1,11 +1,51 @@
 <!doctype html>
 <title>Branch</title>
 <script type="module">
+ const {log, auth, buttonTemplate, unauthTemplate, authTemplate} = window
+ await import("/deps/localForage-1.10.0.js")
+ const store = localforage.createInstance({
+   name: "fifth-random",
+   storeName: "proof"
+ })
+
+ try {
+   let authUrl = await store.getItem("authUrl")
+   if (!authUrl) {
+     log.textContent += `arrived unauthenticated\n`
+     auth.appendChild(buttonTemplate.content.cloneNode(true))
+     auth.querySelector('button').onclick = event => {
+       auth.innerHTML = ""
+       auth.appendChild(unauthTemplate.content.cloneNode(true))
+       auth.querySelector('form').onsubmit = event => {
+         event.preventDefault()
+         store.setItem("authUrl", event.target.url.value)
+       }
+     }
+   } else {
+     log.textContent += `arrived authenticated\n`
+     auth.textContent = authUrl
+   }
+ } catch (error) {
+   window.log.textContent += `WAT? ${error}`
+ }
 </script>
+
+</script>
+<div id="auth">
+</div>
 <pre id="log">
 </pre>
-<p>
-  <a target="reader" href="//id.localhost:1080/id">login</a>
-</p>
-<iframe name="reader" src=""
-        sandbox="allow-same-origin allow-scripts allow-storage-access-by-user-activation"></iframe>
+
+<template id="buttonTemplate">
+  <button>Login</button>
+</template>
+
+<template id="unauthTemplate">
+  <form action="#">
+    <label for="url">URL</label>
+    <input name="url" type="text">
+  </form>
+</template>
+
+<template id="authTemplate">
+</template>
