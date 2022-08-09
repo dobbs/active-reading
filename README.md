@@ -10,7 +10,6 @@ relatively easy to type.
 
 # running locally
 
-    cd id
     file_server -p 1080
 
-visit http://id.localhost:1080
+visit http://id.localhost:1080/id
