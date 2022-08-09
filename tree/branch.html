@@ -7,26 +7,42 @@
    name: "fifth-random",
    storeName: "proof"
  })
+ main()
+ async function main() {
 
- try {
-   let authUrl = await store.getItem("authUrl")
-   if (!authUrl) {
-     log.textContent += `arrived unauthenticated\n`
-     auth.appendChild(buttonTemplate.content.cloneNode(true))
-     auth.querySelector('button').onclick = event => {
-       auth.innerHTML = ""
-       auth.appendChild(unauthTemplate.content.cloneNode(true))
-       auth.querySelector('form').onsubmit = event => {
-         event.preventDefault()
-         store.setItem("authUrl", event.target.url.value)
-       }
+   try {
+     let authUrl = await store.getItem("authUrl")
+     if (!authUrl) {
+       log.textContent += `arrived unauthenticated\n`
+       showLoginButton()
+     } else {
+       log.textContent += `arrived authenticated\n`
+       showAuthenticated(authUrl)
      }
-   } else {
-     log.textContent += `arrived authenticated\n`
-     auth.textContent = authUrl
+   } catch (error) {
+     window.log.textContent += `WAT? ${error}`
    }
- } catch (error) {
-   window.log.textContent += `WAT? ${error}`
+ }
+ function showLoginButton() {
+   auth.innerHTML = ""
+   auth.appendChild(buttonTemplate.content.cloneNode(true))
+   auth.querySelector('button').onclick = showUnauthenticated
+ }
+ function showUnauthenticated(event) {
+   auth.innerHTML = ""
+   auth.appendChild(unauthTemplate.content.cloneNode(true))
+   auth.querySelector('form').onsubmit = event => {
+     event.preventDefault()
+     const authUrl = event.target.url.value
+     store.setItem("authUrl", authUrl)
+     showAuthenticated(authUrl)
+   }
+ }
+ function showAuthenticated(authUrl) {
+   auth.innerHTML = ""
+   const node = authTemplate.content.cloneNode(true)
+   node.querySelector('iframe').setAttribute("src", authUrl)
+   auth.appendChild(node)
  }
 </script>
 
@@ -48,4 +64,6 @@
 </template>
 
 <template id="authTemplate">
+  <iframe name="reader" src=""
+          sandbox="allow-same-origin allow-scripts allow-storage-access-by-user-activation"></iframe>
 </template>
