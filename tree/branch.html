@@ -12,10 +12,27 @@
 
    try {
      window.addEventListener("message", event => {
-       const {origin, data} = event
+       const {origin, source, data} = event
        if (data.action != "registerCapabilities") return
        const {capabilities} = data
        console.log("registerCapabilities", capabilities)
+       if (capabilities.includes("activate")) {
+         source.postMessage({action: "activate"}, origin)
+       }
+       if (capabilities.includes("store")) {
+         window.save = async function save(details) {
+           const reader = document
+             .querySelector('iframe[name=reader]').contentWindow
+           try {
+             await reader.postMessage({
+               action: "store",
+               details
+             }, "*")
+           } catch (error) {
+             console.log("save() failed", {details, error})
+           }
+         }
+       }
      })
 
      let authUrl = await store.getItem("authUrl")
