@@ -20,6 +20,7 @@
        storeName: "storage"
      })
      console.log("acctivate", {site})
+     document.querySelector('svg').setAttribute("style", "fill: palegreen;")
    }
  }
  const actions = Object.keys(capabilities)
@@ -42,3 +43,9 @@
  }, "*")
 
 </script>
+<style>
+ html, body {margin: 0; padding: 0; overflow: hidden;}
+</style>
+<svg viewBox="-5 -5 10 10" style="fill: lightgray;">
+  <circle r="4">
+</svg>
