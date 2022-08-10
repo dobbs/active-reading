@@ -1,0 +1,44 @@
+<!doctype html>
+<title>Browser Storage</title>
+<script type="module">
+ let storage
+ const capabilities = {
+   async store(site, details) {
+     if (storage) {
+       console.log("store", {site, details})
+       try {
+         await storage.setItem(site, details)
+       } catch (error) {
+         console.log("failed to store()", {error, site, details})
+       }
+     }
+   },
+   async activate(site) {
+     await import("/deps/localForage-1.10.0.js")
+     storage = localforage.createInstance({
+       name: "fifth-random",
+       storeName: "storage"
+     })
+     console.log("acctivate", {site})
+   }
+ }
+ const actions = Object.keys(capabilities)
+
+ window.addEventListener("message", ({origin, data}) => {
+   switch (data.action) {
+     case "store":
+       capabilities.store(origin, data.details)
+       break
+     case "activate":
+       capabilities.activate(origin)
+       break
+     default:
+       throw new Error("unknown action")
+   }
+ })
+ window.parent.postMessage({
+   action: "registerCapabilities",
+   capabilities: actions
+ }, "*")
+
+</script>

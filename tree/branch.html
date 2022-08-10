@@ -11,6 +11,13 @@
  async function main() {
 
    try {
+     window.addEventListener("message", event => {
+       const {origin, data} = event
+       if (data.action != "registerCapabilities") return
+       const {capabilities} = data
+       console.log("registerCapabilities", capabilities)
+     })
+
      let authUrl = await store.getItem("authUrl")
      if (!authUrl) {
        log.textContent += `arrived unauthenticated\n`
