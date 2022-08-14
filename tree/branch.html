@@ -20,7 +20,8 @@
          source.postMessage({action: "activate"}, origin)
        }
        if (capabilities.includes("store")) {
-         window.save = async function save(details) {
+         console.log("where", "creating save function", {window})
+         async function save(details) {
            const reader = document
              .querySelector('iframe[name=reader]').contentWindow
            try {
@@ -32,6 +33,8 @@
              console.log("save() failed", {details, error})
            }
          }
+         window.save = save
+         console.log("where", "created save function... is it installed?", {window})
        }
      })
 
@@ -70,6 +73,19 @@
  }
 </script>
 <link rel="icon" type="image/png" href="data:image/png;base64,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">
+<p>
+  In this step of the experiment we ask you to imagine you are
+  visiting the wiki pages of another author. What if you could "login"
+  to this remote wiki using a domain name under your own control?
+</p>
+<p>
+  1. click the login button
+</p>
+<p>
+  2. copy and paste this url
+</p>
+<pre>http://id.localhost:1080/id/browser-storage.html</pre>
+
 <div id="auth">
 </div>
 <pre id="log">
