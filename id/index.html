@@ -6,8 +6,8 @@
  async function main() {
    await import("./deps/localForage-1.10.0.js")
    const store = localforage.createInstance({
-     name: "fifth-random",
-     storeName: "proof"
+     name: "active-reading",
+     storeName: "client"
    })
    try {
      let previousWelcome = await store.getItem("greeting")
@@ -42,7 +42,7 @@
 </pre>
 <p>
   You can use the browser's developer tools to reset the
-  experiment by deleting the indexed DB named "fifth-random".
+  experiment by deleting the indexed DB named "active-reading".
 </p>
 <p>
   The next step in the experiment is to visit <a href="" id="next" target="_blank"></a>

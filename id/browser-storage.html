@@ -16,10 +16,10 @@
    async activate(site) {
      await import("/deps/localForage-1.10.0.js")
      storage = localforage.createInstance({
-       name: "fifth-random",
+       name: "active-reading",
        storeName: "storage"
      })
-     console.log("acctivate", {site})
+     console.log("activate", {site})
      document.querySelector('svg').setAttribute("style", "fill: palegreen;")
    }
  }
