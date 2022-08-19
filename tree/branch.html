@@ -52,17 +52,20 @@
  }
  function showLoginButton() {
    auth.innerHTML = ""
+   auth.appendChild(instructionsTemplate.content.cloneNode(true))
    auth.appendChild(buttonTemplate.content.cloneNode(true))
    auth.querySelector('button').onclick = showUnauthenticated
  }
  function showUnauthenticated(event) {
    auth.innerHTML = ""
+   auth.appendChild(instructionsTemplate.content.cloneNode(true))
    auth.appendChild(unauthTemplate.content.cloneNode(true))
    auth.querySelector('form').onsubmit = event => {
      event.preventDefault()
      const authUrl = event.target.url.value
      store.setItem("authUrl", authUrl)
      showAuthenticated(authUrl)
+     window.log.textContent += `authentication URL saved\n`
    }
  }
  function showAuthenticated(authUrl) {
@@ -78,13 +81,6 @@
   visiting the wiki pages of another author. What if you could "login"
   to this remote wiki using a domain name under your own control?
 </p>
-<p>
-  1. click the login button
-</p>
-<p>
-  2. copy and paste this url
-</p>
-<pre>http://id.localhost:1080/id/browser-storage.html</pre>
 
 <div id="auth">
 </div>
@@ -105,4 +101,14 @@
 <template id="authTemplate">
   <iframe name="reader" src="" style="border: 0; width: 2rem; height: 2rem;"
           sandbox="allow-same-origin allow-scripts allow-storage-access-by-user-activation"></iframe>
+</template>
+
+<template id="instructionsTemplate">
+  <p>
+    1. click the login button
+  </p>
+  <p>
+    2. copy and paste this url
+  </p>
+  <pre>http://id.localhost:1080/id/browser-storage.html</pre>
 </template>
