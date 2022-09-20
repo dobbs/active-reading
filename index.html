@@ -87,6 +87,14 @@
 
 <script type="module">
  const main = $('main')
+ async function displayState() {
+   const savedUrl = await window.store.getItem("savedUrl")
+   if (!savedUrl) {
+     displayUnknown()
+   } else {
+     displaySaved(savedUrl)
+   }
+ }
  function displayUnknown() {
    main.innerHTML = ''
    main.appendChild($('[data-id=unknown]').content.cloneNode(true))
@@ -121,8 +129,9 @@
    storeName: "client"
  })
  Object.assign(window, {
-   main, store, displayUnknown, displayEditing, displaySaved, forgetUrl
+   store /* , main, displayUnknown, displayEditing, displaySaved, forgetUrl */
  })
+ displayState()
 </script>
 
 <template data-id="intro">
