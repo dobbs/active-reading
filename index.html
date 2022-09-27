@@ -41,9 +41,11 @@
 </nav>
 
 <main>
+  <welcome-active-reader></welcome-active-reader>
 </main>
 
 <script type="module">
+ import "/deps/welcome-active-reader.js"
  const $ = (s,el=document) => el.querySelector(s)
  const $$ = (s,el=document) => Array.from(el.querySelectorAll(s))
 
@@ -63,75 +65,6 @@
    $, $$,
    activateNav
  })
-</script>
-
-<template data-id="unknown">
-  <button>Login</button>
-</template>
-
-<template data-id="editing">
-  <form action="#">
-    <label for="url">URL</label>
-    <input name="url" type="url">
-    <input type="submit" value="Save">
-  </form>
-</template>
-
-<template data-id="saved">
-  <iframe
-    name="reader" src="" style="border: 0; width: 2rem; height: 2rem;"
-    sandbox="allow-same-origin allow-scripts allow-storage-access-by-user-activation">
-  </iframe>
-  <button>Forget</button>
-</template>
-
-<script type="module">
- const main = $('main')
- async function displayState() {
-   const savedUrl = await window.store.getItem("savedUrl")
-   if (!savedUrl) {
-     displayUnknown()
-   } else {
-     displaySaved(savedUrl)
-   }
- }
- function displayUnknown() {
-   main.innerHTML = ''
-   main.appendChild($('[data-id=unknown]').content.cloneNode(true))
-   $('button', main).onclick = displayEditing
- }
- function displayEditing() {
-   main.innerHTML = ''
-   main.appendChild($('[data-id=editing]').content.cloneNode(true))
-   $('form', main).onsubmit = event => {
-     event.preventDefault()
-     const savedUrl = event.target.url.value
-     window.store.setItem("savedUrl", savedUrl)
-     displaySaved(savedUrl)
-     console.log(`URL saved\n`)
-   }
- }
- function displaySaved(savedUrl) {
-   main.innerHTML = ''
-   const {$, $$, store, displayUnknown} = window
-   const node = $('[data-id=saved]').content.cloneNode(true)
-   $('iframe', node).setAttribute('src', savedUrl)
-   $('button', node).onclick = forgetUrl
-   main.appendChild(node)
- }
- function forgetUrl() {
-   store.removeItem("savedUrl")
-   displayUnknown()
- }
- await import("/deps/localForage-1.10.0.js")
- const store = localforage.createInstance({
-   name: "active-reading",
-   storeName: "client"
- })
- Object.assign(window, {
-   store /* , main, displayUnknown, displayEditing, displaySaved, forgetUrl */
- })
- displayState()
 </script>
 
 <template data-id="intro">
