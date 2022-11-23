@@ -23,14 +23,14 @@
    grid-area: main; background-color: bisque;
    display: flex; flex-direction: column;
  }
- #head {
+ header {
    grid-area: head; background-color: pink;
    display: flex; flex-direction: row;
  }
 </style>
 
-<section id="head">
-</section>
+<header>
+</header>
 
 <nav>
   <a href="#" data-step="intro">Intro</a>
@@ -54,10 +54,10 @@
      a.onclick = e => {
        e.preventDefault()
        const step = e.target.dataset.step
-       const head = $('#head')
-       const el = $(`[data-id="${step}"]`)
+       const head = $('header')
+       const template = $(`[data-id="${step}"]`)
        head.innerHTML = ""
-       head.appendChild(el.content.cloneNode(true))
+       head.appendChild(template.content.cloneNode(true))
      }
    }
  }
