@@ -24,13 +24,17 @@ export class WelcomeActiveReader extends LitElement {
   constructor() {
     super()
     this.state = 'forgotten'
+  }
+
+  connectedCallback() {
+    super.connectedCallback()
     this.store = window.localforage.createInstance({
       name: 'Notebook Connector'
     })
     this.store.getItem('url').then(url => {
       if (url) {
         this.state = 'remembered'
-        this.url = 'url'
+        this.url = url
       } else {
         this.state = 'forgotten'
       }
