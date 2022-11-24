@@ -45,7 +45,6 @@
 </main>
 
 <script type="module">
- import "/deps/welcome-active-reader.js"
  const $ = (s,el=document) => el.querySelector(s)
  const $$ = (s,el=document) => Array.from(el.querySelectorAll(s))
 
@@ -65,6 +64,44 @@
    $, $$,
    activateNav
  })
+</script>
+
+<script type="module">
+ async function awaitCapabilities() {
+   try {
+     window.addEventListener("message", event => {
+       const {origin, source, data} = event
+       if (data.action != "registerCapabilities") return
+       const {capabilities} = data
+       console.log("registerCapabilities", capabilities)
+       if (capabilities.includes("activate")) {
+         source.postMessage({activeReading: "activate"}, origin)
+       }
+       if (capabilities.includes("store")) {
+         async function save(details) {
+           try {
+             await source.postMessage({
+               activeReading: "store",
+               details
+             }, "*")
+           } catch (error) {
+             console.log("save() failed", {details, error})
+           }
+         }
+         console.log("where", "created window.save() function")
+         Object.assign(window, {save})
+       }
+     })
+   } catch (error) {
+     console.log(`WAT? ${error}`)
+   }
+ }
+ awaitCapabilities()
+ Object.assign(window, {awaitCapabilities})
+</script>
+
+<script type="module">
+  import "/deps/welcome-active-reader.js"
 </script>
 
 <template data-id="intro">
