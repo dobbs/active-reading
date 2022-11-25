@@ -19,3 +19,17 @@ things)
     file_server -p 1080
 
 visit http://id.localhost:1080/id
+
+# next steps
+
+- [ ] decide if <welcome-active-reader> should listen for capabilities
+      and hold the .save() method
+- [ ] create a visible form to save details through to the notebook
+- [ ] extend the visible docs to reveal the multiple domain name support
+- [ ] extend the visible docs to link to the browse view
+- [ ] implement download or drag of wiki export files
+- [ ] experiment with variant of notebook.html browser that runs
+      inside a wiki frame and invites the reader to open ghost pages
+      from the data in the notebook.
+- [ ] experiment with collecting notes into the notebook via
+      copy-n-paste or drag-n-drop to extend the possible sources
