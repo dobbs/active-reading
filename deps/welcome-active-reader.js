@@ -33,8 +33,8 @@ export class WelcomeActiveReader extends LitElement {
     })
     this.store.getItem('url').then(url => {
       if (url) {
-        this.state = 'remembered'
         this.url = url
+        this.state = 'remembered'
       } else {
         this.state = 'forgotten'
       }
@@ -67,7 +67,10 @@ export class WelcomeActiveReader extends LitElement {
 
     case 'remember':
       next = 'remembered'
-      fn = e => this.store.setItem('url', e.target.url.value)
+      fn = e => {
+        this.store.setItem('url', e.target.url.value)
+        this.url = e.target.url.value
+      }
       break
 
     case 'forget':

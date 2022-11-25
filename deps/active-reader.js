@@ -26,14 +26,7 @@ export class ActiveReader extends LitElement {
   connectedCallback() {
     super.connectedCallback()
     if (this.#isFramed()) {
-      document.hasStorageAccess().then(granted => {
-        console.log({hasStorageAccess:granted})
-        if (granted) {
-          this.#listen()
-        } else {
-          this.#confirm()
-        }
-      })
+      this.#confirm()
     } else {
       this.#browse()
     }
@@ -65,14 +58,18 @@ export class ActiveReader extends LitElement {
     return window.parent !== window
   }
 
-  #confirm() {
-    console.log('need storage access. awaiting confirmation.')
-    this.state = UNCONFIRMED
+  async #confirm() {
+    this.state = UNKNOWN
+    if (await document.hasStorageAccess()) {
+      this.#listen()
+    } else {
+      this.state = UNCONFIRMED
+    }
   }
 
   #requestStorageAccess() {
     document.requestStorageAccess().then(
-      () => this.state = LISTEN,
+      () => this.#listen(),
       () => this.state = UNCONFIRMED
     )
   }
@@ -89,12 +86,12 @@ export class ActiveReader extends LitElement {
   }
 
   #browse() {
-    this.state = BROWSE
     this.#initStorage()
     this.store.getItem('sites').then(sites => {
       if (sites) {
         console.log({sites})
         this._sites  = sites
+        this.state = BROWSE
       }
     })
   }
@@ -107,7 +104,7 @@ export class ActiveReader extends LitElement {
 
   async #onMessage(event) {
     const {origin, data} = event
-    const date = new Date()
+    const date = new Date().toJSON().split(/T/)[0]
     switch (data.activeReading) {
     case 'activate':
       console.log('active readers are welcome here')
@@ -115,13 +112,13 @@ export class ActiveReader extends LitElement {
     case 'store':
       console.log('store', {origin, data})
       const page = data.details
-      const {title=`untitled ${date.toJSON().split(/T/)[0]}`} = page
+      const {title=`untitled ${date}`} = page
       const sites = {...(await this.store.getItem('sites')) || {}}
       if (!sites[origin]) {
         sites[origin] = {}
       }
       sites[origin][title] = page
-      this.store.setItem('sites', sites)
+      await this.store.setItem('sites', sites)
       console.log('store', {sites})
       break
     default:
