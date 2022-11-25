@@ -27,22 +27,80 @@
    grid-area: head; background-color: pink;
    display: flex; flex-direction: row;
  }
+
+ body .hide {
+   display: none;
+ }
+ body.intro .intro,
+ body.connect .connect,
+ body.update .update,
+ body.change-domains .change-domains,
+ body.inspect .inspect
+ {
+   display: block;
+ }
 </style>
 
-<header>
-</header>
+<body class="intro">
+  <header>
+    <p class="hide intro">
+      We experiment with browser local storage and postMessage() across
+      domains.
+    </p>
+    <p class="hide connect">
+      We connect this page in this domain using a URL to another page
+      in another domain. This page and that one engage a custom
+      postMessage() protocol. This page looks for capabilities offered
+      by that one.
+    </p>
+    <p class="hide update">
+      In this page, we invite the reader to annotate. Data are sent to
+      that page which saves the annotations in local storage under that
+      domain.
+    </p>
+    <p class="hide change-domains">
+      Here we visit a similar page under a new domain. Connect using the
+      same URL for the reader's notebook. Annotations for this page will
+      be sent to that page which saves the new annotations in local
+      storage.
+    </p>
+    <p class="hide inspect">
+      Here we visit the reader's notebook and browse the annotations
+      that have been saved there. The notebook also offers links to
+      return to previous pages.
+    </p>
+  </header>
 
-<nav>
-  <a href="#" data-step="intro">Intro</a>
-  <a href="#" data-step="login">Login</a>
-  <a href="#" data-step="update">Update</a>
-  <a href="#" data-step="change-domains">Change Domains</a>
-  <a href="#" data-step="inspect">Inspect</a>
-</nav>
+  <main>
+    <div class="hide intro">
+      <p>
+        Steps to reset the experiment.
+      </p>
+      <ol>
+        <li>clear cookies & site data</li>
+        <li>revoke permission for localhost:1080 cross-site cookies</li>
+        <li>visit http://foo.localhost:1080</li>
+        <li>clear cookies & site data</li>
+        <li>revoke permission for localhost:1080 cross-site cookies</li>
+        <li>visit http://localhost:1080</li>
+        <li>clear cookies & site data</li>
+      </ol>
+    </div>
+    <welcome-active-reader class="hide connect update"></welcome-active-reader>
+    <h2 class="hide update">Update will go here</h2>
+    <h2 class="hide change-domains">Change Domains will go here</h2>
+    <h2 class="hide inspect">Inspect will go here</h2>
+  </main>
 
-<main>
-  <welcome-active-reader></welcome-active-reader>
-</main>
+  <nav>
+    <a href="#" data-step="intro">Intro</a>
+    <a href="#" data-step="connect">Connect</a>
+    <a href="#" data-step="update">Update</a>
+    <a href="#" data-step="change-domains">Change Domains</a>
+    <a href="#" data-step="inspect">Inspect</a>
+  </nav>
+
+</body>
 
 <script type="module">
  const $ = (s,el=document) => el.querySelector(s)
@@ -52,21 +110,10 @@
    for (let a of $$('[data-step]')) {
      a.onclick = e => {
        e.preventDefault()
-       const step = e.target.dataset.step
-       const head = $('header')
-       const template = $(`[data-id="${step}"]`)
-       head.innerHTML = ""
-       head.appendChild(template.content.cloneNode(true))
+       document.body.className = e.target.dataset.step
      }
    }
  }
- Object.assign(window, {
-   $, $$,
-   activateNav
- })
-</script>
-
-<script type="module">
  async function awaitCapabilities() {
    try {
      window.addEventListener("message", event => {
@@ -97,54 +144,14 @@
    }
  }
  awaitCapabilities()
- Object.assign(window, {awaitCapabilities})
+ activateNav()
+ Object.assign(window, {
+   $, $$,
+   activateNav,
+   awaitCapabilities
+ })
 </script>
 
 <script type="module">
   import "/deps/welcome-active-reader.js"
-</script>
-
-<template data-id="intro">
-  <p>
-    We experiment with browser local storage and postMessage() across
-    domains.
-  </p>
-</template>
-
-<template data-id="login">
-  <p>
-    We login to this page in this domain using a URL to another page
-    in another domain. This page and that one engage a custom
-    postMessage() protocol. This page looks for capabilities offered
-    by that one.
-  </p>
-</template>
-
-<template data-id="update">
-  <p>
-    In this page, we invite the reader to annotate. Data are sent to
-    that page which saves the annotations in local storage under that
-    domain.
-  </p>
-</template>
-
-<template data-id="change-domains">
-  <p>
-    Here we visit a similar page under a new domain. Login using the
-    same URL for the reader's notebook. Annotations for this page will
-    be sent to that page which saves the new annotations in local
-    storage.
-  </p>
-</template>
-
-<template data-id="inspect">
-  <p>
-    Here we visit the reader's notebook and browse the annotations
-    that have been saved there. The notebook also offers links to
-    return to previous pages.
-  </p>
-</template>
-
-<script type="module">
- window.activateNav()
 </script>
