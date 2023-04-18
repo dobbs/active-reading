@@ -1,5 +1,17 @@
+/* =================================================================
+Three contexts for this app:
+
+1. collecting url params from bookmarklet into browser local
+storage
+
+2. displaying, editing, and clearing the collection of web clippings
+
+3. hosted within a wiki frame to import clippings into a wiki page
+
+================================================================= */
 import '/deps/localForage-1.10.0.js'
-export async function main(clips, form) {
+
+export async function main(clipsEl, formEl) {
   const store = window.localforage.createInstance({
     name: 'Wiki Clipboard'
   })
@@ -10,28 +22,59 @@ export async function main(clips, form) {
     comment: '',
     ...Object.fromEntries(new URLSearchParams(location.search))
   }
-  form.className = action
 
   switch (action) {
   case 'save':
     await save(store, {url, title, comment})
-    redirect('show')
+    history.back()
     break
-  case 'clear':
-    redirect('confirm')
+//  case 'send':
+    // TODO: postMessage() shiftKey behavior implies a need to
+    // override the default form submit method. This will be an
+    // improvement by reducing the current page reloads. But it also
+    // involves more work to refactor what we have here.
+    // window.parent.postMessage({
+    //   action: 'showResult',
+    //   page: {
+    //   },
+    //   keepLineup: event.shiftKey
+    // }, '*')
     break
-  case 'no-thanks':
-    redirect('show')
-    break
-  case 'yes-please-clear':
-    await clear(store)
-    redirect('empty')
-    break
-  case 'empty':
   case 'show':
-  case 'confirm':
   default:
-    display(clips, store)
+    const clippings = await store.getItem('clippings')
+    if (clippings != null && clippings != undefined && clippings.length > 0) {
+      formEl.dataset.state="show"
+    }
+    formEl.onsubmit = event => {
+      event.preventDefault()
+      const {button} = event.submitter.dataset
+      let next, fn = ()=>{}
+
+      switch (button) {
+      case "show":
+        next="show"
+        break
+      case "clear":
+        next="confirm"
+        break
+      case "no-thanks":
+        next="show"
+        break
+      case "yes-please-clear":
+        next="empty"
+        fn=()=>clear(store)
+        break
+      case "empty":
+      default:
+        next="empty"
+      }
+
+      fn()
+      formEl.dataset.state = next
+      display(clipsEl, store)
+    }
+    display(clipsEl, store)
     break
   }
 }
@@ -84,6 +127,7 @@ async function display(clips, store) {
   try {
     clippings = await store.getItem('clippings')
     if (clippings) {
+      clips.innerHTML = ""
       clippings.forEach(({datetime, url, title, comment}) => {
         clips.innerHTML += `<p><time>${datetime.toString()}</time></p><p>${comment} -- ${title} <a href="${url}">link</a></p>`
       })
