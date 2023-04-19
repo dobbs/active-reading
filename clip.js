@@ -28,23 +28,12 @@ export async function main(clipsEl, formEl) {
     await save(store, {url, title, comment})
     history.back()
     break
-//  case 'send':
-    // TODO: postMessage() shiftKey behavior implies a need to
-    // override the default form submit method. This will be an
-    // improvement by reducing the current page reloads. But it also
-    // involves more work to refactor what we have here.
-    // window.parent.postMessage({
-    //   action: 'showResult',
-    //   page: {
-    //   },
-    //   keepLineup: event.shiftKey
-    // }, '*')
-    break
+  case 'wiki':
   case 'show':
   default:
     const clippings = await store.getItem('clippings')
     if (clippings != null && clippings != undefined && clippings.length > 0) {
-      formEl.dataset.state="show"
+      formEl.dataset.state=action
     }
     formEl.onsubmit = event => {
       event.preventDefault()
@@ -64,6 +53,16 @@ export async function main(clipsEl, formEl) {
       case "yes-please-clear":
         next="empty"
         fn=()=>clear(store)
+        break
+      case "preview":
+      case "wiki":
+        next="wiki"
+        fn=async()=>{
+          window.parent.postMessage({
+            action: 'showResult',
+            page: await page(store, event, formEl)
+          }, '*')
+        }
         break
       case "empty":
       default:
@@ -139,8 +138,37 @@ async function display(clips, store) {
   }
 }
 
-function redirect(state) {
-  const next = new URL(window.location)
-  next.search = `a=${state}`
-  window.location = next
+async function page(store, event, form) {
+  let clippings, story=[], page={}
+  let [date,] = new Date().toJSON().split(/T/)
+  page.title = form.title.value || `Wiki Clipboard ${date}`
+  if (form.synopsis.value) {
+    story.push({
+      type: "paragraph",
+      id: Math.abs(Math.random()*1e20|0).toString(16),
+      text: form.synopsis.value
+    })
+  }
+  try {
+    clippings = await store.getItem('clippings') || []
+    clippings.forEach(({datetime, url, title, comment}) => story.push({
+      type: "paragraph",
+      id: Math.abs(Math.random()*1e20|0).toString(16),
+      text: `${comment} -- ${title} [${url} link]`
+    }))
+    page.story = story
+  } catch(err) {
+    page={title: "Wiki Clipboard Error", story: [
+      {
+        type: "paragraph",
+        id: Math.abs(Math.random()*1e20|0).toString(16),
+        text: `failed to load clippings from localForage:${store.name}\n${err}`
+      }
+    ]}
+  }
+  page.journal = [{
+    type: "create", date: new Date(),
+    item: structuredClone(page)
+  }]
+  return page
 }
