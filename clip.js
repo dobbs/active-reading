@@ -9,7 +9,7 @@ storage
 3. hosted within a wiki frame to import clippings into a wiki page
 
 ================================================================= */
-import '/deps/localForage-1.10.0.js'
+import './localForage-1.10.0.js'
 
 export async function main(clipsEl, formEl) {
   const store = window.localforage.createInstance({
