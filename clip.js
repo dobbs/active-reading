@@ -10,6 +10,7 @@ storage
 
 ================================================================= */
 import './localForage-1.10.0.js'
+import {asSlug, download} from 'https://wiki.dbbs.co/assets/v1/frame.js'
 
 export async function main(clipsEl, formEl) {
   const store = window.localforage.createInstance({
@@ -54,14 +55,11 @@ export async function main(clipsEl, formEl) {
         next="empty"
         fn=()=>clear(store)
         break
-      case "preview":
-      case "wiki":
-        next="wiki"
-        fn=async()=>{
-          window.parent.postMessage({
-            action: 'showResult',
-            page: await page(store, event, formEl)
-          }, '*')
+      case "download":
+        next="show"
+        fn=()=>{
+          const page = pageFrom(clippings, formEl)
+          download(JSON.stringify(page), `${asSlug(page.title)}.json`)
         }
         break
       case "empty":
@@ -71,9 +69,9 @@ export async function main(clipsEl, formEl) {
 
       fn()
       formEl.dataset.state = next
-      display(clipsEl, store)
+      display(clipsEl, clippings)
     }
-    display(clipsEl, store)
+    display(clipsEl, clippings)
     break
   }
 }
@@ -121,26 +119,21 @@ async function clear(store) {
   }
 }
 
-async function display(clips, store) {
-  let clippings
-  try {
-    clippings = await store.getItem('clippings')
-    if (clippings) {
-      clips.innerHTML = ""
-      clippings.forEach(({datetime, url, title, comment}) => {
-        clips.innerHTML += `<p><time>${datetime.toString()}</time></p><p>${comment} -- ${title} <a href="${url}">link</a></p>`
-      })
-    } else {
-      clips.innerHTML = `<p>empty</p>`
-    }
-  } catch(err) {
-    console.error(`failed to load clippings from localForage:${store.name}\n${err}`)
+function display(clips, clippings) {
+  if (clippings) {
+    clips.innerHTML = ""
+    clippings.forEach(({datetime, url, title, comment}) => {
+      clips.innerHTML += `<p><time>${datetime.toString()}</time></p><p>${comment} -- ${title} <a href="${url}">link</a></p>`
+    })
+  } else {
+    clips.innerHTML = `<p>empty</p>`
   }
 }
 
-async function page(store, event, form) {
-  let clippings, story=[], page={}
-  let [date,] = new Date().toJSON().split(/T/)
+function pageFrom(clippings, form) {
+  let story=[], page={}
+  let now = new Date()
+  let [date,] = now.toJSON().split(/T/)
   page.title = form.title.value || `Wiki Clipboard ${date}`
   if (form.synopsis.value) {
     story.push({
@@ -149,26 +142,12 @@ async function page(store, event, form) {
       text: form.synopsis.value
     })
   }
-  try {
-    clippings = await store.getItem('clippings') || []
-    clippings.forEach(({datetime, url, title, comment}) => story.push({
-      type: "paragraph",
-      id: Math.abs(Math.random()*1e20|0).toString(16),
-      text: `${comment} -- ${title} [${url} link]`
-    }))
-    page.story = story
-  } catch(err) {
-    page={title: "Wiki Clipboard Error", story: [
-      {
-        type: "paragraph",
-        id: Math.abs(Math.random()*1e20|0).toString(16),
-        text: `failed to load clippings from localForage:${store.name}\n${err}`
-      }
-    ]}
-  }
-  page.journal = [{
-    type: "create", date: new Date(),
-    item: structuredClone(page)
-  }]
+  clippings.forEach(({datetime, url, title, comment}) => story.push({
+    type: "paragraph",
+    id: Math.abs(Math.random()*1e20|0).toString(16),
+    text: `${comment} -- ${title} [${url} link]`
+  }))
+  page.story = story
+  page.journal = [{type: "create", date: now, item: structuredClone(page)}]
   return page
 }

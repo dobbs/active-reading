@@ -6,8 +6,7 @@
  form .tag {display: none;}
  form[data-state="show"]    .show,
  form[data-state="empty"]   .empty,
- form[data-state="confirm"] .confirm,
- form[data-state="wiki"]    .wiki {display: inline;}
+ form[data-state="confirm"] .confirm {display: inline;}
 </style>
 <body>
   <p>bookmarklet: <a id="bookmarklet" href="">clip</a></p>
@@ -19,15 +18,15 @@
     <button data-button="yes-please-clear" class="tag confirm"
             type="submit">Yes. Please Clear</button>
     <div style="display: flex; max-width: 430px;">
-      <input class="tag wiki" placeholder="page title"
+      <input class="tag show" placeholder="page title"
              style="flex-grow: 4;" type="text"
              name="title" tabindex="4">
-      <button data-button="preview" class="tag wiki"
+      <button data-button="download" class="tag show"
               style="flex-grow: 1;" type="submit"
-              tabindex="6">Preview</button>
+              tabindex="6">Download</button>
     </div>
     <div style="display: flex; max-width: 430px;">
-      <textarea class="tag wiki" placeholder="synopsis" style="flex-grow: 5;"
+      <textarea class="tag show" placeholder="synopsis" style="flex-grow: 5;"
                 name="synopsis" tabindex="5"></textarea>
     </div>
   </form>
