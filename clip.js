@@ -1,16 +1,9 @@
 /* =================================================================
-Three contexts for this app:
-
-1. collecting url params from bookmarklet into browser local
-storage
-
-2. displaying, editing, and clearing the collection of web clippings
-
-3. hosted within a wiki frame to import clippings into a wiki page
-
+Two contexts for this app:
+1. collecting url params from bookmarklet into browser local storage
+2. displaying, downloading, or clearing the collection of web clippings
 ================================================================= */
 import './localForage-1.10.0.js'
-import {asSlug, download} from 'https://wiki.dbbs.co/assets/v1/frame.js'
 
 export async function main(clipsEl, formEl) {
   const store = window.localforage.createInstance({
@@ -28,8 +21,8 @@ export async function main(clipsEl, formEl) {
   case 'save':
     await save(store, {url, title, comment})
     history.back()
+    history.go()
     break
-  case 'wiki':
   case 'show':
   default:
     const clippings = await store.getItem('clippings')
@@ -154,4 +147,19 @@ function pageFrom(clippings, form) {
     item: structuredClone(page)
   }]
   return page
+}
+
+const asSlug = title => title
+      .replace(/\s/g, '-')
+      .replace(/[^A-Za-z0-9-]/g, '')
+      .toLowerCase()
+
+function download(string, file, mime='text/json') {
+  var data = `data:${mime};charset=utf-8,` + encodeURIComponent(string)
+  var anchor = document.createElement('a')
+  anchor.setAttribute("href", data)
+  anchor.setAttribute("download", file)
+  document.body.appendChild(anchor) // required for firefox
+  anchor.click()
+  anchor.remove()
 }
