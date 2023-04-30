@@ -24,7 +24,7 @@ export async function main(clipsEl, formEl) {
     break
   case 'show':
   default:
-    const clippings = await store.getItem('clippings')
+    let clippings = await store.getItem('clippings')
     if (clippings != null && clippings != undefined && clippings.length > 0) {
       formEl.dataset.state=action
     }
@@ -45,7 +45,10 @@ export async function main(clipsEl, formEl) {
         break
       case "yes-please-clear":
         next="empty"
-        fn=()=>clear(store)
+        fn=()=>{
+          clear(store)
+          clippings = []
+        }
         break
       case "download":
         next="show"
@@ -112,7 +115,7 @@ async function clear(store) {
 }
 
 function display(clips, clippings) {
-  if (clippings) {
+  if (clippings != null && clippings != undefined && clippings.length > 0) {
     clips.innerHTML = ""
     clippings.forEach(({datetime, url, title, comment}) => {
       clips.innerHTML += `<p><time>${datetime.toString()}</time></p><p>${comment} — ${title} <a href="${url}">link</a></p>`
