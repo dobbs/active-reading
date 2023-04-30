@@ -72,16 +72,42 @@ export async function main(clipsEl, formEl) {
 }
 
 export function bookmarklet(location) {
-  // This code is difficult to read.  It returns a javascript bookmarklet.
-  //
-  // One aspect of the bookmarklet is the display of a simple HTML
-  // form which sends it's data back to the page that hosts this
-  // javascript. We're taking that extra trouble here specifically to
-  // enable others the freedom to host their own copy of this page for
-  // themselves. It contributes to making it harder to read.
-  return    'javascript:(()=>{const d=document; return `<style>form textarea.hide {display:none;}</style><form method="get" action="' +
-    location +
-    '"><p>${d.title} <a href="${document.URL}">link</a></p><textarea name="title" class="hide">${d.title}</textarea><textarea name="url" class="hide">${d.URL}</textarea><input name="comment" type="text" style="width: 100%;" placeholder="Why remember this page?"><input type="hidden" name="a" value="save"></form>`})();'
+  /*
+    Code generation always makes things harder to read and think
+    about. We're hoping these extra comments will make the bookmarklet
+    easier to maintain or improve over time.
+
+    When the bookmarklet is invoked, it runs this function.  By
+    returning a string, the browser will render the HTML in place
+    while maintaining access to the DOM of the original page.
+
+    d=document will refer to the page where the bookmarklet is invoked.
+
+    Using GET, the form sends the metadata encoded in the URL search.
+
+    We use hidden <textarea> tags to skip the trouble of managing HTML
+    attribute encoding that would be needed for <input> tags.
+  */
+  const fn = ()=>{
+    const d=document;
+    return `<style>form .hide {display:none;}</style>
+<form method="get" action="{{LOCATION}}">
+<p>${d.title} <a href="${d.URL}">link</a></p>
+<textarea name="title" class="hide">${d.title}</textarea>
+<textarea name="url" class="hide">${d.URL}</textarea>
+<input name="comment" type="text" style="width: 100%;"
+  placeholder="Why remember this page?">
+<input type="hidden" name="a" value="save"></form>`
+  }
+  /*
+    Wrap the fn() in bookmarklet boilerplate as an immediately
+    invoked function expression (IIFE).
+
+    The location for the form submission will be hard-coded to the
+    fully-qualified URL of this page when an author installs the
+    bookmarklet.
+  */
+  return `javascript:(${fn.toString().replace('{{LOCATION}}', location)})();`
 }
 
 async function save(store, {url, title, comment}) {
