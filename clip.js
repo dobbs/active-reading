@@ -123,7 +123,7 @@ function display(clips, clippings) {
   if (clippings) {
     clips.innerHTML = ""
     clippings.forEach(({datetime, url, title, comment}) => {
-      clips.innerHTML += `<p><time>${datetime.toString()}</time></p><p>${comment} -- ${title} <a href="${url}">link</a></p>`
+      clips.innerHTML += `<p><time>${datetime.toString()}</time></p><p>${comment} — ${title} <a href="${url}">link</a></p>`
     })
   } else {
     clips.innerHTML = `<p>empty</p>`
@@ -145,9 +145,13 @@ function pageFrom(clippings, form) {
   clippings.forEach(({datetime, url, title, comment}) => story.push({
     type: "paragraph",
     id: Math.abs(Math.random()*1e20|0).toString(16),
-    text: `${comment} -- ${title} [${url} link]`
+    text: `${comment} — ${title} [${url} link]`
   }))
   page.story = story
-  page.journal = [{type: "create", date: now, item: structuredClone(page)}]
+  page.journal = [{
+    type: "create",
+    date: now.valueOf(),
+    item: structuredClone(page)
+  }]
   return page
 }
