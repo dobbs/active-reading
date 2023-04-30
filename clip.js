@@ -20,8 +20,7 @@ export async function main(clipsEl, formEl) {
   switch (action) {
   case 'save':
     await save(store, {url, title, comment})
-    history.back()
-    history.go()
+    window.location = url
     break
   case 'show':
   default:
